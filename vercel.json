@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "outputDirectory": "public",
+  "rewrites": [
+    { "source": "/ping",       "destination": "/api/ping" },
+    { "source": "/proxy",      "destination": "/api/proxy" },
+    { "source": "/proxy-post", "destination": "/api/proxy-post" }
+  ]
+}

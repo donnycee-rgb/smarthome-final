@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Home — Control System</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══════════ LEFT RAIL ══════════ -->
+  <aside class="rail">
+    <div class="rail-top">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L17 7v11H3V7L10 2z" fill="currentColor" opacity=".15"/><path d="M10 2L17 7v11H3V7L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 18v-5h6v5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="brand-name">Smart Home</div>
+          <div class="brand-sub">Ltd. Control System</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-group-label">Main</div>
+        <a class="nav-item active" href="#" onclick="setTab('all');return false;">
+          <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="7" height="7" rx="1.5"/><rect x="10" y="1" width="7" height="7" rx="1.5"/><rect x="1" y="10" width="7" height="7" rx="1.5"/><rect x="10" y="10" width="7" height="7" rx="1.5"/></svg>
+          Dashboard
+          <span class="nav-live" id="navDot"></span>
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 5v4.5l3 1.5"/></svg>
+          Activity
+        </a>
+
+        <div class="nav-group-label">Devices</div>
+        <a class="nav-item" href="#" onclick="setTab('all');return false;">
+          <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="2"/><path d="M9 1.5v3M9 13.5v3M1.5 9h3M13.5 9h3"/></svg>
+          All Devices
+        </a>
+        <a class="nav-item" href="#" onclick="setTab('security');return false;">
+          <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2L3 5v5c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V5L9 2z"/></svg>
+          Security
+        </a>
+        <a class="nav-item" href="#" onclick="setTab('climate');return false;">
+          <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2v9.5A2.5 2.5 0 1 0 11.5 14V2z"/><path d="M9 8l2.5 1.5"/></svg>
+          Climate
+        </a>
+        <a class="nav-item" href="#">
+          <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="5" width="10" height="8" rx="1.5"/><path d="M11.5 8.5l5-2.5v7l-5-2.5z"/><circle cx="6.5" cy="9" r="2"/></svg>
+          Camera
+        </a>
+      </nav>
+    </div>
+
+    <!-- ESP32 connect -->
+    <div class="rail-bottom">
+      <div class="connect-label">ESP32 Address</div>
+      <div class="connect-row">
+        <input type="text" id="esp32ip" value="192.168.0.100" placeholder="192.168.x.x" class="ip-input"/>
+        <button class="btn-link" onclick="connect()">Link</button>
+      </div>
+      <div class="conn-pill" id="connPill">
+        <span class="conn-dot" id="connDot"></span>
+        <span id="connText">Not connected</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════ MOBILE NAV ══════════ -->
+  <nav class="mobile-nav">
+    <button class="mnav-btn active" id="mnav-all" onclick="setTab('all')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="8" height="8" rx="1.5"/><rect x="11" y="1" width="8" height="8" rx="1.5"/><rect x="1" y="11" width="8" height="8" rx="1.5"/><rect x="11" y="11" width="8" height="8" rx="1.5"/></svg>
+      <span>All</span>
+    </button>
+    <button class="mnav-btn" id="mnav-security" onclick="setTab('security')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2L4 5.5v5.5c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V5.5L10 2z"/></svg>
+      <span>Security</span>
+    </button>
+    <button class="mnav-btn" id="mnav-climate" onclick="setTab('climate')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2v10.5A2.5 2.5 0 1 0 12.5 15V2z"/><path d="M10 9l2.5 1.5"/></svg>
+      <span>Climate</span>
+    </button>
+    <button class="mnav-btn" id="mnav-connect" onclick="toggleConnectSheet()">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="2"/><circle cx="15" cy="10" r="2"/><path d="M7 10h6"/><path d="M3 6l-1.5-1.5M3 14l-1.5 1.5M17 6l1.5-1.5M17 14l1.5 1.5"/></svg>
+      <span>Connect</span>
+    </button>
+  </nav>
+
+  <!-- ══════════ MOBILE CONNECT SHEET ══════════ -->
+  <div class="connect-sheet-overlay" id="connectOverlay" onclick="toggleConnectSheet()"></div>
+  <div class="connect-sheet" id="connectSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px;"><path d="M10 2L17 7v11H3V7L10 2z" stroke-linejoin="round"/></svg>
+      ESP32 Connection
+    </div>
+    <div class="sheet-conn-status">
+      <span class="conn-dot" id="connDotMobile"></span>
+      <span id="connTextMobile">Not connected</span>
+    </div>
+    <div class="sheet-field-label">Device IP Address</div>
+    <div class="sheet-input-row">
+      <input type="text" id="esp32ip_mobile" value="192.168.0.100" placeholder="192.168.x.x" class="ip-input sheet-ip-input"/>
+      <button class="btn-link sheet-link-btn" onclick="connectMobile()">Link</button>
+    </div>
+    <div class="sheet-field-label" style="margin-top:16px;">Camera IP:Port</div>
+    <div class="sheet-input-row">
+      <input type="text" id="camip_mobile" value="192.168.0.105:6677" placeholder="IP:port" class="ip-input sheet-ip-input"/>
+      <button class="btn-link sheet-link-btn" onclick="connectCameraMobile()">Link</button>
+    </div>
+    <div class="sheet-hint">Make sure <strong>node proxy.js</strong> is running on your computer</div>
+  </div>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <div class="main-wrap">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-brand-btn" onclick="toggleConnectSheet()">
+          <div class="brand-icon" style="width:30px;height:30px;">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L17 7v11H3V7L10 2z" fill="currentColor" opacity=".15"/><path d="M10 2L17 7v11H3V7L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 18v-5h6v5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          </div>
+        </button>
+        <div>
+          <div class="page-title">Home Overview</div>
+          <div class="page-sub" id="lastUpdated">Waiting for connection…</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="sensor-pill">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 1v5A2.5 2.5 0 1 0 8.5 8V1z"/></svg>
+          <span id="tempVal">--</span>°C
+        </div>
+        <div class="sensor-pill">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 1C6 1 2 5.5 2 7.5a4 4 0 0 0 8 0C10 5.5 6 1 6 1z"/></svg>
+          <span id="humVal">--</span>%
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+          <svg id="themeIcon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.2 3.2l1 1M11.8 11.8l1 1M3.2 12.8l1-1M11.8 4.2l1-1"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Proxy warning -->
+    <div class="proxy-alert" id="proxyBanner">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5.5"/><path d="M7 4.5v3M7 9.5v.5"/></svg>
+      <span>Proxy not running — open a terminal and run <strong>node proxy.js</strong> then click Link</span>
+    </div>
+
+    <div class="content">
+
+      <!-- ── TOP SECTION: Hero + Members + Info ── -->
+      <div class="top-section">
+
+        <!-- Hero house card -->
+        <div class="hero-card">
+          <div class="hero-header">
+            <div>
+              <div class="hero-title">Smart Home Ltd.</div>
+              <div class="hero-addr">Nairobi, Kenya · ESP32 System</div>
+            </div>
+            <div class="hero-status-group">
+              <div class="hero-chip" id="heroStatus">
+                <span class="hero-dot offline" id="heroDot"></span>Offline
+              </div>
+            </div>
+          </div>
+
+          <!-- House photo -->
+          <div class="house-illustration">
+            <img
+              src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=900&auto=format&fit=crop&q=80"
+              alt="Smart Home"
+              class="house-photo"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            />
+            <!-- Fallback SVG if image fails -->
+            <div class="house-photo-fallback" style="display:none;">
+              <svg viewBox="0 0 480 220" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+                <defs>
+                  <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--sky-top)"/><stop offset="100%" stop-color="var(--sky-bot)"/></linearGradient>
+                  <linearGradient id="grassGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--grass-top)"/><stop offset="100%" stop-color="var(--grass-bot)"/></linearGradient>
+                </defs>
+                <rect width="480" height="220" fill="url(#skyGrad)" rx="14"/>
+                <rect x="0" y="170" width="480" height="50" fill="url(#grassGrad)"/>
+                <rect x="120" y="90" width="240" height="100" fill="var(--house-wall)" rx="2"/>
+                <polygon points="105,95 240,30 375,95" fill="var(--house-roof)"/>
+                <polygon points="115,92 240,34 365,92" fill="var(--house-roof2)"/>
+                <rect x="210" y="140" width="60" height="50" fill="var(--house-door)" rx="3"/>
+                <circle cx="262" cy="166" r="3" fill="var(--house-knob)"/>
+                <rect x="138" y="108" width="50" height="38" fill="var(--house-win)" rx="3"/>
+                <line x1="163" y1="108" x2="163" y2="146" stroke="var(--house-wframe)" stroke-width="1.5"/>
+                <line x1="138" y1="127" x2="188" y2="127" stroke="var(--house-wframe)" stroke-width="1.5"/>
+                <rect x="292" y="108" width="50" height="38" fill="var(--house-win)" rx="3"/>
+                <line x1="317" y1="108" x2="317" y2="146" stroke="var(--house-wframe)" stroke-width="1.5"/>
+                <line x1="292" y1="127" x2="342" y2="127" stroke="var(--house-wframe)" stroke-width="1.5"/>
+                <circle cx="240" cy="172" r="5" fill="var(--gate-dot)" id="housegatedot"/>
+                <circle cx="240" cy="60" r="5" fill="var(--fan-dot)" id="housefandot"/>
+                <ellipse cx="68" cy="148" rx="30" ry="40" fill="var(--tree-c)"/>
+                <rect x="62" y="165" width="12" height="20" fill="var(--trunk-c)" rx="2"/>
+                <ellipse cx="412" cy="148" rx="30" ry="40" fill="var(--tree-c)"/>
+                <rect x="406" y="165" width="12" height="20" fill="var(--trunk-c)" rx="2"/>
+                <circle cx="430" cy="38" r="18" fill="var(--sun-c)" opacity=".7"/>
+              </svg>
+            </div>
+            <!-- Floating device badges -->
+            <div class="house-badge" style="top:22%;left:46%;" id="hbFan">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="1.2"/><path d="M7 5.8C7 5.8 5.8 3 7 1.5s2.7 1.2 1.2 4.3"/><path d="M8.2 7C8.2 7 11 5.8 12.5 7s-1.2 2.7-4.3 1.2"/><path d="M7 8.2C7 8.2 8.2 11 7 12.5s-2.7-1.2-1.2-4.3"/><path d="M5.8 7C5.8 7 3 8.2 1.5 7s1.2-2.7 4.3-1.2"/></svg>
+            </div>
+            <div class="house-badge" style="top:62%;left:46%;" id="hbGate">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="1.5" width="10" height="11" rx="1"/><path d="M5 5.5h4M5 8h4"/></svg>
+            </div>
+            <div class="house-badge" style="top:40%;right:10%;" id="hbMotion">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="3.5" r="1.2"/><path d="M7 5.5v4M5 7l-1.5 2.5M9 7l1.5 2.5"/></svg>
+            </div>
+          </div>
+
+          <!-- Flow tabs -->
+          <div class="flow-tabs">
+            <button class="flow-tab active" id="ftab-all" onclick="setTab('all')">All Devices</button>
+            <button class="flow-tab" id="ftab-climate" onclick="setTab('climate')">Climate</button>
+            <button class="flow-tab" id="ftab-security" onclick="setTab('security')">Security</button>
+          </div>
+        </div>
+
+        <!-- Right panel: Members + System -->
+        <div class="right-panel">
+
+          <!-- Members -->
+          <div class="panel-card members-card">
+            <div class="panel-card-title">
+              Smart Home Security Systems
+            </div>
+            <div class="members-label">Team Members</div>
+            <div class="members-row">
+              <div class="avatar av1" title="O.G. Odhiambo">OO</div>
+              <div class="avatar av2" title="Patrick Safari">PS</div>
+              <div class="avatar av3" title="Mary Giovanni">MG</div>
+              <div class="avatar av4" title="Charles Mwangi">CM</div>
+              <div class="avatar av5" title="Erick Kamande">EK</div>
+              <div class="avatar av6" title="Reinson Okoth">RO</div>
+            </div>
+            <div class="members-names">
+              O.G. Odhiambo · Patrick Safari · Mary Giovanni · Charles Mwangi · Erick Kamande · Reinson Okoth
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- System info inline -->
+            <div class="sys-info-label">System Info</div>
+            <div class="sys-rows">
+              <div class="sys-row"><span>Board</span><span class="mono">ESP32</span></div>
+              <div class="sys-row"><span>IP Address</span><span class="mono" id="infoIP">--</span></div>
+              <div class="sys-row"><span>Poll Rate</span><span class="mono">3 s</span></div>
+              <div class="sys-row"><span>Fan threshold</span><span class="mono">26 / 25 °C</span></div>
+              <div class="sys-row"><span>Motion timeout</span><span class="mono">60 s</span></div>
+              <div class="sys-row"><span>Connection</span><span class="mono" id="infoConn">--</span></div>
+            </div>
+          </div>
+
+          <!-- Activity log mini -->
+          <div class="panel-card activity-card">
+            <div class="activity-header">
+              <span class="panel-card-title" style="margin-bottom:0;">Activity</span>
+              <button class="log-clear-btn" onclick="clearLog()">Clear</button>
+            </div>
+            <div class="log-scroll" id="logBox">
+              <div class="log-entry">
+                <span class="log-time">--:--:--</span>
+                <span class="log-msg">Waiting for ESP32 connection</span>
+                <span class="log-tag tag-sys">SYS</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── DEVICE CARDS ── -->
+      <div class="section-label">Devices</div>
+      <div class="device-grid" id="deviceGrid">
+
+        <!-- Fan -->
+        <div class="dcard" id="card-fan" data-category="climate">
+          <div class="dcard-top">
+            <div class="dcard-icon">
+              <svg id="fanSvg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="10" cy="10" r="1.8"/>
+                <path d="M10 8.2C10 8.2 8.2 4.5 10 2.5s4 1.8 1.8 6.2"/>
+                <path d="M11.8 10C11.8 10 15.5 8.2 17.5 10s-1.8 4-6.2 1.8"/>
+                <path d="M10 11.8C10 11.8 11.8 15.5 10 17.5s-4-1.8-1.8-6.2"/>
+                <path d="M8.2 10C8.2 10 4.5 11.8 2.5 10s1.8-4 6.2-1.8"/>
+              </svg>
+            </div>
+            <span class="dcard-badge" id="fanBadge">Offline</span>
+          </div>
+          <div class="dcard-name">Ceiling Fan</div>
+          <div class="dcard-sub" id="fanSub">Auto — activates above 26 °C</div>
+          <div class="dcard-actions">
+            <button class="dact on" onclick="sendCmd('/fan/on')">On</button>
+            <button class="dact off" onclick="sendCmd('/fan/off')">Off</button>
+          </div>
+        </div>
+
+        <!-- Light -->
+        <div class="dcard" id="card-bulb" data-category="climate">
+          <div class="dcard-top">
+            <div class="dcard-icon">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M10 2a6 6 0 0 1 3.6 10.8L12.5 14h-5l-1.1-1.2A6 6 0 0 1 10 2z"/>
+                <path d="M8 14v1.2a2 2 0 0 0 4 0V14"/>
+              </svg>
+            </div>
+            <span class="dcard-badge" id="bulbBadge">Offline</span>
+          </div>
+          <div class="dcard-name">Room Light</div>
+          <div class="dcard-sub" id="bulbSub">Auto — activates on motion</div>
+          <div class="dcard-actions">
+            <button class="dact on" onclick="sendCmd('/bulb/on')">On</button>
+            <button class="dact off" onclick="sendCmd('/bulb/off')">Off</button>
+          </div>
+        </div>
+
+        <!-- Gate -->
+        <div class="dcard" id="card-gate" data-category="security">
+          <div class="dcard-top">
+            <div class="dcard-icon">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="2" width="14" height="17" rx="1.5"/>
+                <path d="M8 8h4M8 11.5h4"/>
+                <circle cx="13.5" cy="10" r="0.8" fill="currentColor" stroke="none"/>
+              </svg>
+            </div>
+            <span class="dcard-badge" id="gateBadge">Offline</span>
+          </div>
+          <div class="dcard-name">Main Gate</div>
+          <div class="dcard-sub">Servo-controlled — keypad &amp; web</div>
+          <div class="dcard-actions">
+            <button class="dact on" onclick="sendCmd('/gate/open')">Open</button>
+            <button class="dact neutral" onclick="sendCmd('/gate/close')">Close</button>
+          </div>
+        </div>
+
+        <!-- Motion -->
+        <div class="dcard" id="card-motion" data-category="security">
+          <div class="dcard-top">
+            <div class="dcard-icon">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="10" cy="5" r="1.8"/>
+                <path d="M10 8v6M7 10l-2.5 4M13 10l2.5 4"/>
+              </svg>
+            </div>
+            <span class="dcard-badge" id="motionBadge">Offline</span>
+          </div>
+          <div class="dcard-name">Motion Sensor</div>
+          <div class="dcard-sub" id="motionSub">PIR — passive infrared</div>
+          <div class="motion-display" id="motionBig">--</div>
+          <div class="motion-bar"><div class="motion-fill" id="motionFill"></div></div>
+        </div>
+
+        <!-- Curtain -->
+        <div class="dcard" id="card-curtain" data-category="climate">
+          <div class="dcard-top">
+            <div class="dcard-icon">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M2 4h16M2 4v13M18 4v13M10 4v13M2 17h16"/>
+              </svg>
+            </div>
+            <span class="dcard-badge" id="curtainBadge">Offline</span>
+          </div>
+          <div class="dcard-name">Curtain</div>
+          <div class="dcard-sub" id="curtainSub">Servo-controlled</div>
+          <div class="dcard-actions">
+            <button class="dact on" onclick="sendCmd('/curtain/open')">Open</button>
+            <button class="dact neutral" onclick="sendCmd('/curtain/close')">Close</button>
+          </div>
+        </div>
+
+        <!-- Cooker -->
+        <div class="dcard" id="card-cooker" data-category="climate">
+          <div class="dcard-top">
+            <div class="dcard-icon">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="9" width="16" height="9" rx="1.8"/>
+                <path d="M6 9V7M10 9V5.5M14 9V7"/>
+                <circle cx="6" cy="6" r="1.3"/><circle cx="10" cy="4.2" r="1.3"/><circle cx="14" cy="6" r="1.3"/>
+              </svg>
+            </div>
+            <span class="dcard-badge" id="cookerBadge">Offline</span>
+          </div>
+          <div class="dcard-name">Cooker</div>
+          <div class="dcard-sub" id="cookerSub">Manual control only</div>
+          <div class="dcard-actions">
+            <button class="dact on" onclick="sendCmd('/cooker/on')">On</button>
+            <button class="dact off" onclick="sendCmd('/cooker/off')">Off</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── CAMERA PANEL ── -->
+      <div class="section-label" id="cameraLabel">Security Camera</div>
+      <div class="camera-section" id="cameraSection">
+
+        <!-- Stream side -->
+        <div class="cam-stream-side">
+          <div class="cam-ip-bar">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="4" width="9" height="7" rx="1.2"/><path d="M10.5 7.5l3-1.5v5l-3-1.5z"/><circle cx="6" cy="7.5" r="1.5"/></svg>
+            <span id="camIpDisplay" class="mono" style="font-size:0.75rem;">192.168.0.105:6677</span>
+            <input type="text" id="camip" value="192.168.0.105:6677" placeholder="IP:port" class="ip-input cam-ip-input"/>
+            <button class="btn-link" onclick="connectCamera()">Connect</button>
+          </div>
+          <div class="cam-frame">
+            <img id="camStream" src="" alt="Camera feed" onerror="this.style.opacity='.08'"/>
+            <div class="cam-rec-badge"><span class="rec-dot"></span>REC</div>
+          </div>
+        </div>
+
+        <!-- Controls side -->
+        <div class="cam-ctrl-side">
+
+          <div class="ctrl-group">
+            <div class="ctrl-group-label">Controls</div>
+            <button class="cam-btn" id="btnFlash" onclick="toggleFlash()">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1L4 8h4l-2 5 7-8H9L11 1z"/></svg>
+              <span class="flash-label">Flash</span>
+            </button>
+            <button class="cam-btn" onclick="triggerFocus()">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="2.5"/><path d="M1 1v3.5h3.5M13 1v3.5H9.5M1 13v-3.5h3.5M13 13v-3.5H9.5"/></svg>
+              Focus
+            </button>
+            <button class="cam-btn" onclick="takeSnapshot()">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="12" height="9" rx="1.2"/><circle cx="7" cy="7.5" r="2"/><path d="M4.5 3V2h5v1"/></svg>
+              Snapshot
+            </button>
+            <button class="cam-btn" onclick="refreshStream()">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11.5 7A4.5 4.5 0 1 1 7 2.5M11.5 2.5V7H7"/></svg>
+              Refresh
+            </button>
+          </div>
+
+          <div class="ctrl-group">
+            <div class="ctrl-group-label">Quality — <span id="qualityVal">80%</span></div>
+            <input type="range" class="quality-slider" min="10" max="100" value="80"
+              oninput="document.getElementById('qualityVal').textContent=this.value+'%'"
+              onchange="setQuality(this.value)"/>
+          </div>
+
+          <div class="ctrl-group">
+            <div class="ctrl-group-label">Orientation</div>
+            <div class="orient-grid">
+              <button class="cam-btn" onclick="setOrientation('portrait')">Portrait</button>
+              <button class="cam-btn" onclick="setOrientation('landscape')">Landscape</button>
+              <button class="cam-btn" onclick="setOrientation('reverse_portrait')">Flip V</button>
+              <button class="cam-btn" onclick="setOrientation('reverse_landscape')">Flip H</button>
+            </div>
+          </div>
+
+          <!-- Gate password -->
+          <div class="ctrl-group">
+            <div class="ctrl-group-label">
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" style="width:11px;height:11px;display:inline-block;vertical-align:middle;margin-right:4px;"><rect x="3" y="6.5" width="8" height="6" rx="1.2"/><path d="M5 6.5V5a2 2 0 0 1 4 0v1.5"/><circle cx="7" cy="9.5" r=".8" fill="currentColor" stroke="none"/></svg>
+              Gate Password
+            </div>
+            <div class="pwd-row">
+              <input type="password" id="pwdInput" class="ip-input" placeholder="1234" maxlength="6" style="flex:1;"/>
+              <button class="btn-link" onclick="sendPassword()">Send</button>
+            </div>
+            <div class="pwd-hint">Press <strong>#</strong> on keypad to submit · <strong>*</strong> to clear</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main-wrap -->
+</div><!-- /app -->
+
+<script src="script.js"></script>
+<script>
+// ── Tab system ────────────────────────────────────────────────────────────────
+let currentTab = 'all';
+
+function setTab(tab) {
+  currentTab = tab;
+
+  // Update flow tabs in hero card
+  document.querySelectorAll('.flow-tab').forEach(t => t.classList.remove('active'));
+  const ft = document.getElementById('ftab-' + tab);
+  if (ft) ft.classList.add('active');
+
+  // Update mobile nav buttons
+  document.querySelectorAll('.mnav-btn').forEach(b => b.classList.remove('active'));
+  const mb = document.getElementById('mnav-' + tab);
+  if (mb) mb.classList.add('active');
+
+  // Filter device cards
+  const cards = document.querySelectorAll('.dcard');
+  const section = document.getElementById('deviceGrid');
+  const cameraSection = document.getElementById('cameraSection');
+  const cameraLabel = document.getElementById('cameraLabel');
+
+  if (tab === 'all') {
+    cards.forEach(c => c.style.display = '');
+    cameraSection.style.display = '';
+    cameraLabel.style.display = '';
+  } else if (tab === 'security') {
+    cards.forEach(c => {
+      c.style.display = c.dataset.category === 'security' ? '' : 'none';
+    });
+    cameraSection.style.display = '';
+    cameraLabel.style.display = '';
+  } else if (tab === 'climate') {
+    cards.forEach(c => {
+      c.style.display = c.dataset.category === 'climate' ? '' : 'none';
+    });
+    cameraSection.style.display = 'none';
+    cameraLabel.style.display = 'none';
+  }
+}
+
+// ── Mobile connect sheet ──────────────────────────────────────────────────────
+function toggleConnectSheet() {
+  const sheet = document.getElementById('connectSheet');
+  const overlay = document.getElementById('connectOverlay');
+  const open = sheet.classList.contains('open');
+  sheet.classList.toggle('open', !open);
+  overlay.classList.toggle('open', !open);
+  document.body.style.overflow = open ? '' : 'hidden';
+}
+
+function connectMobile() {
+  const v = document.getElementById('esp32ip_mobile').value.trim();
+  if (v) document.getElementById('esp32ip').value = v;
+  connect();
+  setTimeout(() => toggleConnectSheet(), 500);
+}
+
+function connectCameraMobile() {
+  const v = document.getElementById('camip_mobile').value.trim();
+  if (v) document.getElementById('camip').value = v;
+  connectCamera();
+}
+
+// Keep mobile conn status in sync
+const origSetConn = typeof setConn === 'function' ? setConn : null;
+(function syncMobileStatus() {
+  const obs = new MutationObserver(() => {
+    const dot = document.getElementById('connDot');
+    const text = document.getElementById('connText');
+    const mdot = document.getElementById('connDotMobile');
+    const mtext = document.getElementById('connTextMobile');
+    if (dot && mdot) mdot.className = dot.className;
+    if (text && mtext) mtext.textContent = text.textContent;
+  });
+  window.addEventListener('DOMContentLoaded', () => {
+    const pill = document.getElementById('connPill');
+    if (pill) obs.observe(pill, { subtree: true, characterData: true, childList: true, attributes: true });
+  });
+})();
+</script>
+</body>
+</html>
